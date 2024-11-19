@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entahlah</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .quiz-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .question-container {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .option {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .option:hover {
+      background-color: #f5f5f5;
+    }
+
+    .option.selected {
+      background-color: #e3f2fd;
+      border-color: #2196f3;
+    }
+
+    .option.correct {
+      background-color: #c8e6c9;
+      border-color: #4caf50;
+    }
+
+    .option.wrong {
+      background-color: #ffcdd2;
+      border-color: #f44336;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #2196f3;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #1976d2;
+    }
+
+    button:disabled {
+      background-color: #bdbdbd;
+      cursor: not-allowed;
+    }
+
+    .score-container {
+      text-align: center;
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #e3f2fd;
+      border-radius: 5px;
+      display: none;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background-color: #ddd;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+
+    .progress {
+      height: 100%;
+      background-color: #2196f3;
+      border-radius: 5px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="quiz-header">
+      <h1>Entahlah</h1>
+      <div class="progress-bar">
+        <div class="progress"></div>
+      </div>
+    </div>
+    <div id="question-container" class="question-container">
+      <!-- Questions will be inserted here -->
+    </div>
+    <div class="controls">
+      <button id="prev-btn" disabled>Sebelumnya</button>
+      <button id="next-btn">Selanjutnya</button>
+    </div>
+    <div id="score-container" class="score-container">
+      <h2>Hasil Quiz</h2>
+      <p>Skor Anda: <span id="score">0</span>%</p>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        question: "Siapa yang pertama kali menemukan sel dan melalui pengamatan apa?",
+        options: [
+                    "Robert Hooke melalui pengamatan sayatan gabus",
+                    "Schleiden & Schwann melalui pengamatan jaringan hewan",
+                    "Rudolf Virchow melalui pengamatan sel darah",
+                    "Max Schultze melalui pengamatan sel otot"
+                ],
+        correct: 0
+            },
+      {
+        question: "Organel sel manakah yang berfungsi sebagai tempat sintesis protein?",
+        options: [
+                    "Mitokondria",
+                    "Ribosom",
+                    "Lisosom",
+                    "Vakuola"
+                ],
+        correct: 1
+            },
+      {
+        question: "Apa perbedaan utama antara difusi dan osmosis?",
+        options: [
+                    "Difusi memerlukan energi, osmosis tidak",
+                    "Difusi terjadi pada zat padat, osmosis pada zat cair",
+                    "Difusi adalah perpindahan zat dari konsentrasi tinggi ke rendah, osmosis khusus perpindahan air melalui membran semipermeabel",
+                    "Difusi terjadi pada sel hidup, osmosis pada sel mati"
+                ],
+        correct: 2
+            },
+      {
+        question: "Manakah yang bukan merupakan fungsi jaringan epitel?",
+        options: [
+                    "Pelindung",
+                    "Sekresi",
+                    "Fotosintesis",
+                    "Absorbsi"
+                ],
+        correct: 2
+            },
+      {
+        question: "Apa fungsi utama dari sel darah merah (eritrosit)?",
+        options: [
+                    "Pembekuan darah",
+                    "Sistem kekebalan tubuh",
+                    "Mengangkut oksigen",
+                    "Mengangkut nutrisi"
+                ],
+        correct: 2
+            },
+      {
+        question: "Bagian jantung manakah yang memompa darah ke seluruh tubuh?",
+        options: [
+                    "Atrium kanan",
+                    "Atrium kiri",
+                    "Ventrikel kanan",
+                    "Ventrikel kiri"
+                ],
+        correct: 3
+            },
+      {
+        question: "Apa perbedaan utama antara arteri dan vena?",
+        options: [
+                    "Arteri membawa darah ke jantung, vena dari jantung",
+                    "Arteri membawa darah dari jantung, vena ke jantung",
+                    "Arteri berisi darah bersih, vena selalu berisi darah kotor",
+                    "Arteri tidak memiliki katup, vena memiliki banyak katup"
+                ],
+        correct: 1
+            },
+      {
+        question: "Manakah yang merupakan ciri khas otot jantung?",
+        options: [
+                    "Bekerja di bawah kesadaran",
+                    "Tidak memiliki garis-garis",
+                    "Kontraksi cepat dan mudah lelah",
+                    "Kontraksi ritmis dan tidak mudah lelah"
+                ],
+        correct: 3
+            },
+      {
+        question: "Apa fungsi dari neuron motorik?",
+        options: [
+                    "Membawa impuls dari reseptor ke sistem saraf pusat",
+                    "Membawa impuls dari sistem saraf pusat ke efektor",
+                    "Menghubungkan antar neuron",
+                    "Menyimpan memori"
+                ],
+        correct: 1
+            },
+      {
+        question: "Jaringan tumbuhan manakah yang berfungsi mengangkut hasil fotosintesis?",
+        options: [
+                    "Xylem",
+                    "Floem",
+                    "Sklerenkim",
+                    "Kolenkim"
+                ],
+        correct: 1
+            },
+      {
+        question: "Teori sel yang menyatakan 'Omnis cellula e cellula' dikemukakan oleh?",
+        options: [
+            "Robert Hooke",
+            "Rudolf Virchow",
+            "Schleiden & Schwann",
+            "Max Schultze"
+        ],
+        correct: 1
+    },
+      {
+        question: "Organel sel yang disebut sebagai 'powerhouse of the cell' adalah?",
+        options: [
+            "Mitokondria",
+            "Nukleus",
+            "Ribosom",
+            "Lisosom"
+        ],
+        correct: 0
+    },
+      {
+        question: "Dalam percobaan osmosis menggunakan kentang, jika kentang dimasukkan ke dalam larutan garam pekat, maka yang terjadi adalah?",
+        options: [
+            "Kentang membengkak",
+            "Kentang tetap sama",
+            "Kentang mengkerut",
+            "Kentang berubah warna"
+        ],
+        correct: 2
+    },
+      {
+        question: "Jaringan meristem pada tumbuhan berfungsi sebagai?",
+        options: [
+            "Pelindung tumbuhan",
+            "Tempat fotosintesis",
+            "Pengangkut makanan",
+            "Tempat pertumbuhan"
+        ],
+        correct: 3
+    },
+      {
+        question: "Jenis jaringan epitel yang terdapat pada dinding usus adalah?",
+        options: [
+            "Epitel pipih selapis",
+            "Epitel kubus selapis",
+            "Epitel silindris selapis",
+            "Epitel pipih berlapis"
+        ],
+        correct: 2
+    },
+      {
+        question: "Sel darah putih yang memiliki fungsi fagositosis adalah?",
+        options: [
+            "Basofil",
+            "Neutrofil",
+            "Eosinofil",
+            "Limfosit"
+        ],
+        correct: 1
+    },
+      {
+        question: "Katup jantung yang memisahkan atrium kiri dan ventrikel kiri disebut?",
+        options: [
+            "Katup trikuspidalis",
+            "Katup bikuspidalis",
+            "Katup semilunaris aorta",
+            "Katup semilunaris pulmonal"
+        ],
+        correct: 1
+    },
+      {
+        question: "Manakah pernyataan yang benar tentang otot polos?",
+        options: [
+            "Bekerja di bawah kesadaran",
+            "Memiliki garis-garis (lurik)",
+            "Berbentuk silindris bercabang",
+            "Bekerja secara involunter"
+        ],
+        correct: 3
+    },
+      {
+        question: "Neuron yang menghubungkan neuron sensorik dan motorik disebut?",
+        options: [
+            "Neuron konektor",
+            "Interneuron",
+            "Neuron asosiatif",
+            "Neuron pusat"
+        ],
+        correct: 1
+    },
+      {
+        question: "Pembuluh darah yang mengalirkan darah dari jantung ke paru-paru adalah?",
+        options: [
+            "Arteri pulmonalis",
+            "Vena pulmonalis",
+            "Aorta",
+            "Vena cava"
+        ],
+        correct: 0
+    },
+      {
+        question: "Bagian sel yang berperan dalam sintesis lipid adalah?",
+        options: [
+            "Retikulum endoplasma kasar",
+            "Retikulum endoplasma halus",
+            "Aparatus golgi",
+            "Lisosom"
+        ],
+        correct: 1
+    },
+      {
+        question: "Jaringan pengangkut pada tumbuhan yang berfungsi mengangkut air dan mineral adalah?",
+        options: [
+            "Floem",
+            "Xylem",
+            "Parenkim",
+            "Kolenkim"
+        ],
+        correct: 1
+    },
+      {
+        question: "Ciri khas dari otot jantung adalah?",
+        options: [
+            "Berbentuk gelendong",
+            "Tidak memiliki inti",
+            "Memiliki percabangan",
+            "Berinti banyak"
+        ],
+        correct: 2
+    },
+      {
+        question: "Proses difusi terfasilitasi berbeda dengan difusi sederhana karena?",
+        options: [
+            "Membutuhkan energi ATP",
+            "Menggunakan protein pembawa",
+            "Berjalan melawan gradien konsentrasi",
+            "Hanya terjadi pada zat terlarut"
+        ],
+        correct: 1
+    },
+      {
+        question: "Fungsi utama dari trombosit adalah?",
+        options: [
+            "Mengangkut oksigen",
+            "Membunuh bakteri",
+            "Pembekuan darah",
+            "Membawa nutrisi"
+        ],
+        correct: 2
+    },
+      {
+        question: "Komponen utama membran sel adalah?",
+        options: [
+                "Karbohidrat",
+                "Fosfolipid bilayer",
+                "Protein struktural",
+                "Asam nukleat"
+            ],
+        correct: 1
+     },
+      {
+        question: "Ketika sel tumbuhan diletakkan dalam larutan hipertonik, maka akan terjadi?",
+        options: [
+                "Turgid",
+                "Krenasi",
+                "Plasmolisis",
+                "Hemolisis"
+            ],
+        correct: 2
+     },
+      {
+        question: "Jaringan kolenkim pada tumbuhan banyak ditemukan di?",
+        options: [
+                "Akar tua",
+                "Batang muda",
+                "Daun tua",
+                "Buah matang"
+            ],
+        correct: 1
+     },
+      {
+        question: "Jenis sel darah putih yang jumlahnya paling banyak dalam tubuh adalah?",
+        options: [
+                "Neutrofil",
+                "Eosinofil",
+                "Basofil",
+                "Limfosit"
+            ],
+        correct: 0
+     },
+      {
+        question: "Otot lurik memiliki ciri khas berupa?",
+        options: [
+                "Inti di tengah",
+                "Banyak inti di tepi",
+                "Inti tunggal di tengah",
+                "Tidak memiliki inti"
+            ],
+        correct: 1
+     },
+      {
+        question: "Dinding pembuluh arteri tersusun dari?",
+        options: [
+                "Satu lapis otot polos",
+                "Tiga lapis: intima, media, adventisia",
+                "Dua lapis epitel",
+                "Jaringan ikat longgar"
+            ],
+        correct: 1
+     },
+      {
+        question: "Impuls saraf berjalan dari satu neuron ke neuron lain melalui?",
+        options: [
+                "Akson",
+                "Dendrit",
+                "Sinapsis",
+                "Badan sel"
+            ],
+        correct: 2
+     },
+      {
+        question: "Fungsi utama aparatus golgi adalah?",
+        options: [
+                "Sintesis protein",
+                "Respirasi sel",
+                "Modifikasi dan pengemasan protein",
+                "Pencernaan intraseluler"
+            ],
+        correct: 2
+     },
+      {
+        question: "Jaringan epitel yang melapisi pembuluh darah adalah?",
+        options: [
+                "Epitel pipih selapis",
+                "Epitel kubus selapis",
+                "Epitel silindris berlapis",
+                "Epitel transisional"
+            ],
+        correct: 0
+     },
+      {
+        question: "Perbedaan utama antara otot jantung dan otot lurik adalah?",
+        options: [
+                "Jumlah inti sel",
+                "Adanya diskus interkalaris",
+                "Kecepatan kontraksi",
+                "Warna otot"
+            ],
+        correct: 1
+     }
+        ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let answered = new Array(questions.length).fill(false);
+
+    const questionContainer = document.getElementById('question-container');
+    const prevButton = document.getElementById('prev-btn');
+    const nextButton = document.getElementById('next-btn');
+    const scoreContainer = document.getElementById('score-container');
+    const progressBar = document.querySelector('.progress');
+
+    function showQuestion(index) {
+      const question = questions[index];
+      questionContainer.innerHTML = `
+                <h3>Pertanyaan ${index + 1} dari ${questions.length}</h3>
+                <p>${question.question}</p>
+                <div class="options">
+                    ${question.options.map((option, i) => `
+                        <div class="option ${answered[index] && i === question.correct ? 'correct' : ''} 
+                                         ${answered[index] && i !== question.correct ? 'wrong' : ''}"
+                             onclick="selectOption(${i})">
+                            ${option}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+      prevButton.disabled = index === 0;
+      nextButton.textContent = index === questions.length - 1 ? "Selesai" : "Selanjutnya";
+
+      updateProgress();
+    }
+
+    function selectOption(optionIndex) {
+      if (answered[currentQuestion]) return;
+
+      answered[currentQuestion] = true;
+      if (optionIndex === questions[currentQuestion].correct) {
+        score++;
+      }
+
+      const options = questionContainer.querySelectorAll('.option');
+      options[questions[currentQuestion].correct].classList.add('correct');
+      if (optionIndex !== questions[currentQuestion].correct) {
+        options[optionIndex].classList.add('wrong');
+      }
+    }
+
+    function updateProgress() {
+      const progress = ((currentQuestion + 1) / questions.length) * 100;
+      progressBar.style.width = `${progress}%`;
+    }
+
+    prevButton.addEventListener('click', () => {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        showQuestion(currentQuestion);
+      }
+    });
+
+    nextButton.addEventListener('click', () => {
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+      } else {
+        showFinalScore();
+      }
+    });
+
+    function showFinalScore() {
+      const finalScore = (score / questions.length) * 100;
+      let feedback;
+
+      // Menentukan feedback berdasarkan skor
+      if (finalScore <= 20) {
+        feedback = "Terlalu Bodoh";
+      } else if (finalScore <= 50) {
+        feedback = "Bodoh";
+      } else if (finalScore <= 75) {
+        feedback = "Lumayan";
+      } else {
+        feedback = "Ayo Coba Lagi!";
+      }
+
+      // Menampilkan hasil
+      questionContainer.style.display = 'none';
+      scoreContainer.style.display = 'block';
+      scoreContainer.innerHTML = `
+        <h2>Hasil Quiz</h2>
+        <p>Skor Anda: <span id="score">${finalScore.toFixed(1)}%</span></p>
+        <div style="
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: ${finalScore <= 20 ? '#dc3545' : 
+                    finalScore <= 50 ? '#ffc107' :
+                    finalScore <= 75 ? '#17a2b8' : '#28a745'};
+        ">
+            ${feedback}
+        </div>
+    `;
+      document.querySelector('.controls').style.display = 'none';
+    }
+
+    // Start the quiz
+    showQuestion(0);
+  </script>
+</body>
+
+</html>
